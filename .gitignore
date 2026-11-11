@@ -1,0 +1,32 @@
+# Python
+__pycache__/
+*.py[cod]
+.venv/
+venv/
+*.egg-info/
+build/
+dist/
+.pytest_cache/
+.ruff_cache/
+.coverage
+htmlcov/
+
+# Runtime state (mock API db, ledger, exports)
+data/
+*.db
+*.sqlite
+*.log
+
+# Secrets backstop (secrets live in keyring)
+.env
+.env.*
+!.env.example
+*.pem
+*.key
+
+# Editors / OS
+.vscode/
+.idea/
+.spyproject/
+desktop.ini
+Thumbs.db
