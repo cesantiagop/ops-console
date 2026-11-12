@@ -1,0 +1,7 @@
+# gitleaks configuration: the default rules, plus one documented exception.
+[extend]
+useDefault = true
+
+[allowlist]
+description = "Public demo token of the bundled mock API (README example), not a credential"
+regexes = ['''dev-token''']
