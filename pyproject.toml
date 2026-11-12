@@ -36,6 +36,8 @@ where = ["src"]
 [tool.pytest.ini_options]
 testpaths = ["tests"]
 pythonpath = ["."]
+# Starlette's TestClient warns about its httpx dependency; not actionable from this project.
+filterwarnings = ["ignore:Using `httpx` with `starlette.testclient`"]
 addopts = "-q"
 
 [tool.ruff]

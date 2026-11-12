@@ -5,13 +5,15 @@ from __future__ import annotations
 import time
 from collections.abc import Callable
 from datetime import date, timedelta
+from pathlib import Path
 
 from rich.console import Console
 from rich.markup import escape
 
 from ops_client import OpsClient, OpsError
 
-from . import reports, views
+from . import flow, reports, views
+from .ledger import DEFAULT_PATH, Ledger
 
 Ask = Callable[[str], str]
 
@@ -25,6 +27,9 @@ MENU = (
     (3, "Project detail"),
     (4, "Hours by person by week"),
     (5, "Approvals waiting"),
+    (6, "Bulk change projects (CSV)"),
+    (7, "Ledger"),
+    (8, "Undo a run"),
     (0, "Exit"),
 )
 
@@ -42,6 +47,8 @@ class Menu:
         label: str,
         token_source: str,
         today: date | None = None,
+        ledger_path: Path | None = None,
+        ledger_actor: str | None = None,
     ) -> None:
         self.client = client
         self.ask = ask
@@ -49,12 +56,17 @@ class Menu:
         self.label = label
         self.token_source = token_source
         self.today = today or date.today()
+        self.ledger_path = Path(ledger_path) if ledger_path else DEFAULT_PATH
+        self.ledger_actor = ledger_actor
         self._actions: dict[str, Callable[[], None]] = {
             "1": self.health,
             "2": self.search_projects,
             "3": self.project_detail,
             "4": self.hours,
             "5": self.approvals,
+            "6": self.bulk_change,
+            "7": self.ledger,
+            "8": self.undo,
         }
 
     # -- loop --------------------------------------------------------------------------------
@@ -143,6 +155,20 @@ class Menu:
         report = reports.approvals_waiting(waiting, users, self.today)
         self.console.print(views.waiting_table(report))
         self.console.print(views.waiting_by_week(report))
+
+    def bulk_change(self) -> None:
+        path = self.ask("Changeset CSV path: ")
+        with Ledger(self.ledger_path, actor=self.ledger_actor) as ledger:
+            flow.changes_file(self.client, path, ledger, self.console, self.ask, apply=True)
+
+    def ledger(self) -> None:
+        with Ledger(self.ledger_path, actor=self.ledger_actor) as ledger:
+            flow.show_ledger(ledger, self.console, None, self.ask)
+
+    def undo(self) -> None:
+        run_id = self.ask("Run id to undo: ")
+        with Ledger(self.ledger_path, actor=self.ledger_actor) as ledger:
+            flow.undo_run(self.client, run_id, ledger, self.console, self.ask, apply=True)
 
     # -- input helpers -----------------------------------------------------------------------
 
