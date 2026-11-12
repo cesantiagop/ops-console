@@ -1,4 +1,4 @@
-﻿"""Reading lists. Why windows: docs/adr/0003-reading-changing-data.md."""
+"""Reading lists. Why windows: docs/adr/0003-reading-changing-data.md."""
 
 from __future__ import annotations
 

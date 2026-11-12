@@ -1,4 +1,4 @@
-﻿import logging
+import logging
 import sqlite3
 from datetime import date
 
